@@ -20,8 +20,8 @@ function sum_to_n_a(n: number): number {
 /**
  * Recursive
  *
- * Time: O(|n|)
- * Space: O(|n|) because of the call stack.
+ * Time: O(n)
+ * Space: O(n) because of the call stack.
  *
  * More declarative, but less efficient for large values because
  * every number requires another recursive call.
