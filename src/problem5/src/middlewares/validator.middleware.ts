@@ -10,7 +10,15 @@ export function validateBody(schema: ZodType) {
 
 export function validateQuery(schema: ZodType) {
   return (req: Request, _res: Response, next: NextFunction): void => {
-    req.query = schema.parse(req.query) as Request["query"];
+    const parsed = schema.parse(req.query);
+    // Express 5 exposes req.query as a read-only prototype getter, so a plain
+    // assignment throws. Shadowing it with an own property works instead.
+    Object.defineProperty(req, "query", {
+      value: parsed,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
     next();
   };
 }

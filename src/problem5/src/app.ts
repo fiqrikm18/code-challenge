@@ -7,6 +7,8 @@ import morgan from "morgan";
 import dotenv from "dotenv";
 
 import taskRouter from "./routes/task.routers";
+import { openApiSpec } from "./docs/openapi";
+import swaggerUi from "swagger-ui-express";
 import {
   errorHandler,
   notFoundHandler,
@@ -36,6 +38,11 @@ app.use(hpp());
 app.use(morgan("dev"));
 
 app.use("/api/v1/tasks", taskRouter);
+
+app.get("/api-docs.json", (_req, res) => {
+  res.json(openApiSpec);
+});
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openApiSpec));
 
 app.use(notFoundHandler);
 app.use(errorHandler);

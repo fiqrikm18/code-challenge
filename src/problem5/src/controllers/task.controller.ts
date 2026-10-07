@@ -1,11 +1,10 @@
-import {
-  ITaskService,
-  SortOrder,
-  TaskListParams,
-  TaskSortField,
-} from "../services/task.service";
+import { ITaskService, TaskListParams } from "../services/task.service";
 import { catchAsync } from "../utils/catch-async";
 import { Request, Response } from "express";
+import type { z } from "zod";
+import type { taskQuerySchema } from "../schemas/task.schemas";
+
+type TaskQuery = z.infer<typeof taskQuerySchema>;
 
 export class TaskController {
   private readonly taskService: ITaskService;
@@ -24,7 +23,7 @@ export class TaskController {
   });
 
   public updateTask = catchAsync(async (req: Request, res: Response) => {
-    const taskId = Number.parseInt(req.params.id as string);
+    const taskId = Number(req.params.id);
     const updatedTask = await this.taskService.updateTask(taskId, req.body);
 
     res.status(200).json({
@@ -34,7 +33,7 @@ export class TaskController {
   });
 
   public deleteTask = catchAsync(async (req: Request, res: Response) => {
-    const taskId = Number.parseInt(req.params.id as string);
+    const taskId = Number(req.params.id);
     const deletedTask = await this.taskService.deleteTask(taskId);
 
     res.status(200).json({
@@ -44,7 +43,7 @@ export class TaskController {
   });
 
   public getTask = catchAsync(async (req: Request, res: Response) => {
-    const taskId = Number.parseInt(req.params.id as string);
+    const taskId = Number(req.params.id);
     const task = await this.taskService.getTaskById(taskId);
 
     res.status(200).json({
@@ -54,25 +53,23 @@ export class TaskController {
   });
 
   public getTaskList = catchAsync(async (req: Request, res: Response) => {
-    const { page, limit, title, completed, sortField, sortOrder } = req.query;
+    const { page, limit, title, completed, sortField, sortOrder } =
+      req.query as unknown as TaskQuery;
 
-    const params: Partial<TaskListParams> = {};
+    const params: Partial<TaskListParams> = { page, limit };
 
-    if (page) params.page = Number.parseInt(page as string, 1);
-    if (limit) params.limit = Number.parseInt(limit as string, 10);
-
-    if (title || completed !== undefined) {
+    if (title !== undefined || completed !== undefined) {
       params.filter = {};
-      if (title) params.filter.title = title as string;
+      if (title !== undefined) params.filter.title = title;
       if (completed !== undefined) {
         params.filter.completed = completed === "true";
       }
     }
 
-    if (sortField && sortOrder) {
+    if (sortField !== undefined && sortOrder !== undefined) {
       params.sort = {
-        field: sortField as TaskSortField,
-        order: sortOrder as SortOrder,
+        field: sortField,
+        order: sortOrder,
       };
     }
 

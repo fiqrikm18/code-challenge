@@ -26,6 +26,9 @@ export const errorHandler: ErrorRequestHandler = (
   error: unknown,
   _req: Request,
   res: Response,
+  // biome-ignore lint/correctness/noUnusedFunctionParameters: Express requires
+  // 4 parameters (fn.length === 4) to recognize error-handling middleware.
+  _next: NextFunction,
 ) => {
   if (error instanceof ZodError) {
     res.status(400).json({
